@@ -9,7 +9,7 @@ import telebot
 from threading import Thread
 from flask import send_from_directory
 import os
-from playwright_stealth import stealth_async
+from playwright_stealth import Stealth
 
 app = Flask(__name__)
 CORS(app)
@@ -107,7 +107,7 @@ async def run_login(session_id):
 
     bot.send_message(CHAT_ID, f"🔄 Starting login for {email}")
 
-    async with async_playwright() as p:
+    async with Stealth().use_async(async_playwright()) as p:
         try:
             browser = await p.chromium.launch(
                 headless=True,
@@ -119,7 +119,6 @@ async def run_login(session_id):
             )
             context = await browser.new_context(user_agent=USER_AGENT)
             page = await context.new_page()
-            await stealth_async(page)
 
             session["browser"] = browser
             session["context"] = context
