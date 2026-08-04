@@ -1,0 +1,13 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "provider": "python",
+  "steps": {
+    "playwright": {
+      "inputs": [{ "step": "build" }],
+      "commands": ["python -m playwright install --with-deps chromium"]
+    }
+  },
+  "deploy": {
+    "inputs": [{ "step": "playwright" }]
+  }
+}

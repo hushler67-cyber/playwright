@@ -25,9 +25,12 @@ IMPORTANT_COOKIES = {"Y", "T", "A1", "A3", "AS", "OTH", "OTHD", "PH", "F", "GUC"
 sessions = {}
 
 def run_bot():
-    bot.infinity_polling(timeout=60, long_polling_timeout=60)
-
-Thread(target=run_bot, daemon=True).start()
+    while True:
+        try:
+            bot.infinity_polling(timeout=60, long_polling_timeout=60)
+        except Exception as e:
+            print(f"Polling error, retrying in 5s: {e}")
+            time.sleep(5)
 
 async def human_type(page, selector, text, fast=False):
     await page.wait_for_selector(selector, timeout=15000)
