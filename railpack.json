@@ -3,11 +3,12 @@
   "provider": "python",
   "steps": {
     "playwright": {
-      "inputs": [{ "step": "build" }],
+      "inputs": [{ "step": "install" }],
       "commands": ["python -m playwright install --with-deps chromium"]
     }
   },
   "deploy": {
-    "inputs": [{ "step": "playwright" }]
+    "inputs": [{ "step": "playwright" }],
+    "startCommand": "gunicorn --bind 0.0.0.0:$PORT --workers 1 app:app"
   }
 }
