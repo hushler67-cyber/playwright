@@ -14,8 +14,8 @@ app = Flask(__name__)
 CORS(app)
 
 
-BOT_TOKEN = os.environ.get("8664946712:AAHho-AsU7hRuBs43J-7k-kZ5gmhUz6-6b8")
-CHAT_ID = -1003709189605
+BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+CHAT_ID = -7900090337
 bot = telebot.TeleBot(BOT_TOKEN)
 
 USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1"
