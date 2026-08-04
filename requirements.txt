@@ -4,3 +4,4 @@ playwright
 pyTelegramBotAPI
 gunicorn
 python-dotenv
+playwright-stealth

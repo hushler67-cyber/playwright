@@ -1,13 +1,12 @@
 {
-  "$schema": "https://schema.railpack.com",
-  "provider": "python",
-  "steps": {
-    "playwright": {
-      "inputs": [{ "step": "build" }],
-      "commands": ["python -m playwright install --with-deps chromium"]
-    }
-  },
-  "deploy": {
-    "inputs": [{ "step": "playwright" }]
-  }
-}
+     "$schema": "https://schema.railpack.com",
+     "provider": "python",
+     "steps": {
+       "install": {
+         "commands": ["...", "python -m playwright install --with-deps chromium"]
+       }
+     },
+     "deploy": {
+       "startCommand": "gunicorn --bind 0.0.0.0:$PORT --workers 1 app:app"
+     }
+   }

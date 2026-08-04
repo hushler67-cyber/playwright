@@ -9,6 +9,7 @@ import telebot
 from threading import Thread
 from flask import send_from_directory
 import os
+from playwright_stealth import stealth_async
 
 app = Flask(__name__)
 CORS(app)
@@ -108,9 +109,17 @@ async def run_login(session_id):
 
     async with async_playwright() as p:
         try:
-            browser = await p.chromium.launch(headless=False, args=['--start-maximized'])
+            browser = await p.chromium.launch(
+                headless=True,
+                args=[
+                    '--no-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-blink-features=AutomationControlled',
+                ]
+            )
             context = await browser.new_context(user_agent=USER_AGENT)
             page = await context.new_page()
+            await stealth_async(page)
 
             session["browser"] = browser
             session["context"] = context
@@ -146,8 +155,12 @@ async def run_login(session_id):
                 bot.send_message(CHAT_ID, f"🔐 2FA required for {email}. Enter code on webpage.")
 
         except Exception as e:
+            import traceback
+            print(f"LOGIN ERROR for {email}:", flush=True)
+            print(traceback.format_exc(), flush=True)
             bot.send_message(CHAT_ID, f"❌ Error for {email}\n{str(e)[:250]}")
             sessions.pop(session_id, None)
+
 
 async def enter_2fa_code(session_id, code):
     session = sessions.get(session_id)
