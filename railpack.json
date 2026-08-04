@@ -2,13 +2,12 @@
   "$schema": "https://schema.railpack.com",
   "provider": "python",
   "steps": {
-    "playwright": {
-      "inputs": [{ "step": "install" }],
-      "commands": ["python -m playwright install --with-deps chromium"]
+    "install": {
+      "commands": [
+        "python -m venv /app/.venv",
+        "pip install -r requirements.txt",
+        "python -m playwright install --with-deps chromium"
+      ]
     }
-  },
-  "deploy": {
-    "inputs": [{ "step": "playwright" }],
-    "startCommand": "gunicorn --bind 0.0.0.0:$PORT --workers 1 app:app"
   }
 }
