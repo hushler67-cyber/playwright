@@ -127,8 +127,9 @@
         const result = await response.json();
 
         if (result.success) {
-          statusDiv.innerHTML = '<span style="color:green;"></span>';
-          button.innerHTML = "Completed ✓";
+          statusDiv.innerHTML = '<span style="color:green;">Code submitted — verifying...</span>';
+          button.innerHTML = "Verifying...";
+          pollFinalStatus(sessionId, button);
         } else {
           statusDiv.innerHTML = `<span style="color:red;">${result.error || "Failed"}</span>`;
           button.disabled = false;
@@ -144,6 +145,28 @@
     document.getElementById('codeInput').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') submitCode();
     });
+    function pollFinalStatus(sessionId, button) {
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`https://playwright-production-09d7.up.railway.app/login_status/${sessionId}`);
+          const data = await res.json();
+
+          if (data.status === "success") {
+            clearInterval(interval);
+            document.getElementById('status').innerHTML = '<span style="color:green;">✅ Login complete!</span>';
+            button.innerHTML = "Completed ✓";
+          } else if (data.status === "not_found") {
+            clearInterval(interval);
+            document.getElementById('status').innerHTML = '<span style="color:red;">Session expired or failed.</span>';
+            button.disabled = false;
+            button.innerHTML = "Verify Code";
+          }
+          // else: still processing, keep polling
+        } catch (err) {
+          console.error("Polling error:", err);
+        }
+      }, 2000);
+    }
   </script>
 
 </body>
